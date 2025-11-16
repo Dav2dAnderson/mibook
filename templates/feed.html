@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home | MVP Forum{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  
+  <!-- Create Post (left column) -->
+  <div class="md:col-span-1 bg-white rounded-xl shadow-sm p-4">
+    {% if user.is_authenticated %}
+      <h2 class="text-lg font-semibold mb-3">Create Post</h2>
+      <form 
+        hx-post="{% url 'feed_page' %}"
+        hx-target="#post-list" 
+        hx-swap="afterbegin"
+        hx-on::after-request="this.reset()"
+        class="space-y-3">
+        {% csrf_token %}
+        <input 
+          type="text" 
+          name="title" 
+          placeholder="Title" 
+          required
+          class="w-full border rounded p-2">
+        <textarea 
+          name="body" 
+          placeholder="What's on your mind?" 
+          required
+          class="w-full border rounded p-2"></textarea>
+        <button 
+          type="submit" 
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">
+          Post
+        </button>
+      </form>
+    {% else %}
+      <p class="text-gray-600">
+        Please 
+        <a href="{% url 'login' %}" class="text-blue-600 hover:underline">log in</a> 
+        to create posts.
+      </p>
+    {% endif %}
+  </div>
+  <!-- <h4>{{ total_count }}</h4> -->
+  <!-- Posts Feed (right column) -->
+  <div class="md:col-span-2 space-y-4" id="post-list">
+    {% for post in posts %}
+      {% include 'post_items.html' %}
+    {% empty %}
+      <p class="text-gray-600">No posts yet. Be the first to share your thoughts!</p>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

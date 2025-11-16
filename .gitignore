@@ -1,0 +1,61 @@
+# -------------------------
+# Python & Django umumiy fayllari
+# -------------------------
+
+# Python cache fayllari
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+myenv/
+
+# .env fayllari (maxfiy ma'lumotlar)
+.env
+*.env
+
+# PyCharm / VSCode konfiguratsiya fayllari
+.idea/
+.vscode/
+
+# OS tomonidan yaratiladigan fayllar
+.DS_Store
+Thumbs.db
+
+# Django migration cache (lekin migration fayllarini o'chirmaymiz)
+*/migrations/__pycache__/
+
+# Media fayllar (upload qilingan rasmlar)
+media/
+
+# Static fayllar (collectstatic natijasi)
+staticfiles/
+
+# Logs
+logs/
+*.log
+
+# SQLite database (agar git’da saqlamoqchi bo‘lmasangiz)
+db.sqlite3
+db.sqlite3-journal
+
+# Python build fayllari
+build/
+dist/
+*.egg-info/
+
+# Coverage test fayllari
+.coverage
+htmlcov/
+
+# Byte-compiled / optimized / DLL files
+*.dll
+*.so
+*.dylib
+
+# Editor backup files
+*.swp
+*.swo
+*~

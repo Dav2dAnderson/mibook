@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Contact Us | mibook{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto bg-white rounded-xl shadow-sm p-8">
+  <h2 class="text-2xl font-semibold text-center mb-6">Contact Us 📬</h2>
+
+  {% if messages %}
+    {% for message in messages %}
+      <p class="text-center text-green-600 mb-4">{{ message }}</p>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+      {{ form.name }}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+      {{ form.email }}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+      {{ form.message }}
+    </div>
+
+    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+      Send Message
+    </button>
+  </form>
+
+  <p class="text-center text-gray-500 text-sm mt-6">
+    Or reach us at: <strong>support@mibook.com</strong>
+  </p>
+</div>
+{% endblock %}

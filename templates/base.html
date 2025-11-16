@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="dark:bg-gray-900 dark:text-white">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MVP Forum{% endblock %}</title>
+
+  <!-- ✅ Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- ✅ HTMX -->
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+  <!-- ✅ Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+</head>
+<body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-sm border-b border-gray-200 relative">
+    <div class="container mx-auto flex justify-between items-center py-3 px-4">
+
+      <!-- Logo -->
+      <a href="{% url 'feed_page' %}" class="text-xl font-semibold text-blue-600">mibook</a>
+
+      <!-- User section -->
+      <div class="flex items-center space-x-3">
+
+        {% if user.is_authenticated %}
+          <a href="{% url 'profile_user' request.user.username %}" class="text-gray-700 hover:text-blue-600">@{{ request.user.username }}</a>
+          <a href="{% url 'logout' %}" class="text-gray-700 hover:text-blue-600">Logout</a>
+        {% else %}
+          <a href="{% url 'login' %}" class="text-gray-700 hover:text-blue-600">Login</a>
+          <a href="{% url 'register' %}" class="text-blue-600 font-semibold">Sign Up</a>
+        {% endif %}
+
+        <!-- Dropdown trigger (3 dots) -->
+        <button id="menuButton" class="p-2 rounded hover:bg-gray-100 focus:outline-none">
+          <i data-lucide="more-vertical" class="w-5 h-5 text-gray-600"></i>
+        </button>
+      </div>
+
+      <!-- Dropdown menu -->
+      <div id="dropdownMenu"
+           class="hidden absolute right-4 top-14 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50">
+        <a href="{% url 'about_project' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">ℹ️ About Project</a>
+        <a href="{% url 'contact' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📞 Contact</a>
+        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">💬 Support</a>
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'profile_user' request.user.username %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">⚙️ Settings</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="container mx-auto flex-1 mt-6 px-4">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-gray-200 text-center text-gray-600 py-3 mt-10">
+    <p>&copy; {{ now|date:"Y" }} mibook MVP</p>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+
+    // Dropdown toggle
+    const menuBtn = document.getElementById('menuButton');
+    const menu = document.getElementById('dropdownMenu');
+
+    menuBtn.addEventListener('click', () => {
+      menu.classList.toggle('hidden');
+    });
+
+    // Click outside to close
+    document.addEventListener('click', (e) => {
+      if (!menuBtn.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

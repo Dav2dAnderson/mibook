@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ post.title }} | {{ post.author.username }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto mt-10 bg-white shadow-sm rounded-2xl p-6">
+  
+  <!-- Post Title -->
+  <h1 class="text-3xl font-bold mb-2">{{ post.title }}</h1>
+  
+  <!-- Author and Date -->
+  <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+    <p>
+      By 
+      <a href="{% url 'profile_user' post.author.username %}" 
+         class="text-blue-600 hover:underline">@{{ post.author.username }}</a>
+    </p>
+    {% if post.updated_at %}
+      <p>Updated: {{ post.updated_at|date:"M d, Y H:i" }}</p>
+    {% else %}
+      <p>Created: {{ post.created_at|date:"M d, Y H:i" }}</p>
+    {% endif %}
+  </div>
+
+  <!-- Post Body -->
+  <div class="text-gray-800 leading-relaxed mb-6">
+    {{ post.body|linebreaks }}
+  </div>
+
+  <!-- Edit/Delete buttons (only for author) -->
+  {% if user == post.author %}
+  <div class="flex items-center gap-3 mt-6">
+    <a href="{% url 'post_update' post.slug %}" 
+       class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+       ✏️ Edit
+    </a>
+    <a href="{% url 'post_delete' post.slug %}"
+       class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+       🗑 Delete
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Back -->
+<div class="max-w-3xl mx-auto mt-4 text-sm">
+  <a href="{% url 'feed_page' %}" 
+     class="text-gray-600 hover:text-blue-600">← Back</a>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto mt-10 bg-white shadow-sm rounded-2xl p-6">
+  
+  <!-- Post Title -->
+  <h1 class="text-3xl font-bold mb-2">{{ post.title }}</h1>
+  
+  <!-- Author and Date -->
+  <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+    <p>
+      By 
+      <a href="{% url 'profile_user' post.author.username %}" 
+         class="text-blue-600 hover:underline">@{{ post.author.username }}</a>
+    </p>
+    {% if post.updated_at %}
+      <p>Updated: {{ post.updated_at|date:"M d, Y H:i" }}</p>
+    {% else %}
+      <p>Created: {{ post.created_at|date:"M d, Y H:i" }}</p>
+    {% endif %}
+  </div>
+
+  <!-- Post Body -->
+  <div class="text-gray-800 leading-relaxed mb-6">
+    {{ post.body|linebreaks }}
+  </div>
+
+    <!-- Reply Form -->
+  <div class="mt-8">
+    <h2 class="text-xl font-semibold mb-4">Leave a Reply</h2>
+    <form method="POST" action="{% url 'post_reply' post.slug %}" class="space-y-4">
+      {% csrf_token %}
+      
+      <!-- Reply Content -->
+      <div>
+        <textarea name="content" rows="4" required
+          class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Write your reply..."></textarea>
+      </div>
+
+      <!-- Submit Button -->
+      <div>
+        <button type="submit" 
+          class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition">
+          Reply
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Existing Replies -->
+  <div class="mt-8">
+    <h3 class="text-lg font-semibold mb-2">Replies</h3>
+    {% for reply in post.replies.all %}
+      <div class="border-t border-gray-200 py-2">
+        <p class="text-sm text-gray-500">@{{ reply.author.username }} - {{ reply.created_at|date:"M d, Y H:i" }}</p>
+        <p class="text-gray-800">{{ reply.body|linebreaks }}</p>
+      </div>
+    {% empty %}
+      <p class="text-gray-500">No replies yet. Be the first to reply!</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock content %}

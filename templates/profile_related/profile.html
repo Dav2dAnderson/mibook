@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}@{{ profile_user.username }} | MVP Forum{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mt-10 grid grid-cols-1 md:grid-cols-4 gap-6">
+
+  <!-- Sidebar: Settings Menu -->
+  {% if user == profile_user %}
+  <div class="col-span-1 bg-white rounded-xl shadow-sm p-4">
+    <h2 class="text-lg font-semibold mb-4">Settings</h2>
+    <ul class="space-y-2 text-gray-700">
+      <li>
+        <a href="{% url 'profile_edit' %}" class="block p-2 rounded hover:bg-blue-50 hover:text-blue-600 transition">
+          Edit Profile
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'change_password' %}" class="block p-2 rounded hover:bg-blue-50 hover:text-blue-600 transition">
+          Change Password
+        </a>
+      </li>
+      <li>
+        <a href="#" class="block p-2 rounded hover:bg-blue-50 hover:text-blue-600 transition">
+          Privacy Settings
+        </a>
+      </li>
+      <li>
+        <a href="#" class="block p-2 rounded hover:bg-blue-50 hover:text-blue-600 transition">
+          Notification Settings
+        </a>
+      </li>
+    </ul>
+  </div>
+  {% endif %}
+
+  <!-- Main Profile Content -->
+  <div class="{% if user == profile_user %}col-span-1 md:col-span-3{% else %}col-span-1 md:col-span-4{% endif %} bg-white rounded-xl shadow-sm p-6">
+
+    <!-- Profile Header -->
+    <div class="flex items-center gap-4 mb-6">
+      {% if profile_user.profile.image %}
+        <img src="{{ profile_user.profile.image.url }}" alt="Profile image"
+             class="w-24 h-24 rounded-full object-cover border">
+      {% else %}
+        <img src="{% static 'images/default-avatar.png' %}" alt="Default avatar"
+             class="w-24 h-24 rounded-full object-cover border">
+      {% endif %}
+
+      <div>
+        <h1 class="text-2xl font-semibold">@{{ profile_user.username }}</h1>
+        <p class="text-gray-700 text-sm">{{ profile_user.first_name }} {{ profile_user.last_name }}</p>
+        <p class="text-gray-600 text-sm mt-1">{{ profile_user.profile.bio|default:"No bio yet." }}</p>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="flex gap-8 text-sm text-gray-600 border-t border-b py-3 mb-6">
+      <div>
+        <span class="font-semibold text-gray-900">{{ posts.count }}</span> Posts
+      </div>
+      <div>
+        <span class="font-semibold text-gray-900">{{ profile_user.replies.count }}</span> Replies
+      </div>
+    </div>
+
+    <!-- User's Posts -->
+    <h2 class="text-lg font-semibold mb-3">Posts by @{{ profile_user.username }}</h2>
+    <div class="space-y-4">
+      {% for post in posts %}
+        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition">
+          <a href="{% url 'post_detail' post.slug %}">
+            <h3 class="text-lg font-semibold hover:text-blue-600">{{ post.title }}</h3>
+          </a>
+          <p class="text-gray-700 text-sm mt-1">{{ post.body }}</p>
+          {% if post.updated_at %}
+            <span class="text-xs text-gray-500">{{ post.updated_at }}</span>
+          {% else %}
+            <span class="text-xs text-gray-500">{{ post.created_at }}</span>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p class="text-gray-600">No posts yet.</p>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

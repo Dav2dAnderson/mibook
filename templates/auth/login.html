@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Login | MVP Forum{% endblock %}
+
+{% block content %}
+<div class="flex justify-center items-center min-h-[70vh]">
+  <div class="bg-white rounded-xl shadow-sm p-8 w-full max-w-md">
+    <h2 class="text-2xl font-semibold mb-6 text-center">Welcome back 👋</h2>
+
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">Username</label>
+        <input type="text" name="username" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" required>
+      </div>
+
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">Password</label>
+        <input type="password" name="password" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" required>
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700">
+        Log in
+      </button>
+    </form>
+
+    <p class="text-sm text-gray-600 text-center mt-4">
+      Don’t have an account?
+      <a href="{% url 'register' %}" class="text-blue-600 hover:underline">Sign up</a>
+    </p>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.querySelector("form");
+  const csrftoken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+  form.addEventListener("submit", async function(event) {
+    event.preventDefault(); // Sahifani yangilanishini to‘xtatadi
+
+    const username = form.querySelector("[name=username]").value.trim();
+    const password = form.querySelector("[name=password]").value.trim();
+
+    // 🔹 Tugmani vaqtincha o‘chirib qo‘yamiz
+    const submitBtn = form.querySelector("button[type=submit]");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Logging in...";
+
+    try {
+      const response = await fetch("{% url 'login' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrftoken
+        },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // 🔹 Muvaffaqiyatli login
+        window.location.href = data.redirect_url;
+      } else {
+        showError(data.error || "Login yoki parol noto‘g‘ri.");
+      }
+    } catch (error) {
+      showError("Server bilan bog‘lanishda xatolik yuz berdi.");
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Log in";
+  });
+
+  // 🔸 Xato xabari chiqaruvchi funksiya
+  function showError(message) {
+    let old = document.querySelector("#login-error");
+    if (old) old.remove();
+
+    const div = document.createElement("div");
+    div.id = "login-error";
+    div.className = "bg-red-100 text-red-700 border border-red-300 rounded-md p-2 mt-3 text-sm text-center";
+    div.textContent = message;
+    form.appendChild(div);
+  }
+});
+</script>
+
+{% endblock %}
