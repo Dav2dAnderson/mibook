@@ -182,7 +182,17 @@ class PostReplyView(LoginRequiredMixin, DetailView):
 class AboutProjectView(TemplateView):
     template_name = 'about_project.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
+        context['ceo_name'] = "Davronbek Nazarov"
+        context['ceo_bio'] = (
+            "Dasturchi, ishlab chiquvchi va mibook platformasining asoschisi. "
+        )
+        context['ceo_photo'] = "/media/profile_images/DSC08446_copy.jpg"
+        context['contact_email'] = "dav2danderson@gmail.com"
+
+        return context
 
 
 class ContactView(FormView):
