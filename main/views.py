@@ -13,7 +13,9 @@ from django.views.decorators.csrf import csrf_protect
 from django.core.mail import send_mail, BadHeaderError
 from django.conf import settings
 
-from .models import Post, Replies
+from accounts.models import Follow
+
+from .models import Post, Replies, Message
 from .forms import PostForm, ContactForm
 
 import logging
@@ -21,53 +23,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 # Create your views here.
-
-
-class ProfileView(DetailView):
-    model = User
-    template_name = 'profile_related/profile.html'
-    slug_field = 'username'
-    slug_url_kwarg = 'username'
-    context_object_name = 'profile_user'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['posts'] = self.object.posts.all()
-        return context
     
-
-class ProfileEditView(View):
-    def get(self, request):
-        return render(request, 'profile_related/profile_edit.html')
-    
-    def post(self, request):
-        user = request.user
-        profile = user.profile
-
-        profile.bio = request.POST.get("bio")
-        email = request.POST.get('email')
-        if email and email != user.email:
-            user.email = email
-            user.save()
-
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        
-        if first_name or last_name:
-            user.first_name = first_name
-            user.last_name = last_name
-            user.save()
-        
-        if "image" in request.FILES:
-            profile.image = request.FILES["image"]
-        profile.save()
-
-        return redirect("profile_user", username=user.username)
 
 
 class PostDetailView(DetailView):
     model = Post
-    template_name = 'post_detail.html'
+    template_name = 'posts_related/post_detail.html'
     context_object_name = 'post'
     slug_field = 'slug'
     slug_url_kwarg = 'slug'
@@ -75,7 +36,7 @@ class PostDetailView(DetailView):
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
-    template_name = 'post_edit.html'
+    template_name = 'posts_related/post_edit.html'
     fields = ['title', 'body']
     slug_field = 'slug'
     slug_url_kwarg = 'slug'
@@ -96,7 +57,7 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
-    template_name = 'post_confirm_delete.html'
+    template_name = 'posts_related/post_confirm_delete.html'
     slug_field = 'slug'
     slug_url_kwarg = 'slug'
     context_object_name = 'post'
@@ -106,8 +67,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user == post.author
     
     def get_success_url(self):
-        return reverse('feed_page')
-
+        return reverse('profile_user', kwargs={'username': self.request.user.username})
 
 class FeedView(ListView):
     model = Post
@@ -131,7 +91,7 @@ class FeedView(ListView):
             post.author = request.user
             post.save()
         
-            return render(request, 'post_items.html', {'post': post})
+            return render(request, 'posts_related/post_items.html', {'post': post})
         else:
             # Return form errors
             return HttpResponse("Invalid form data", status=400)
@@ -160,7 +120,7 @@ def toggle_like(request):
 
 class PostReplyView(LoginRequiredMixin, DetailView):
     model = Post
-    template_name = 'post_reply.html'
+    template_name = 'posts_related/post_reply.html'
     slug_field = 'slug'
     slug_url_kwarg = 'slug'
 
@@ -228,6 +188,58 @@ class ContactView(FormView):
         logger.error(f"Invalid contact form submission: {form.errors}")
         return super().form_invalid(form)
     
+
+class ChatView(LoginRequiredMixin, TemplateView):
+    template_name = 'chats.html'
+
+    def get_context_data(self, **kwargs):
+        context =  super().get_context_data(**kwargs)
+
+        user = self.request.user
+        following = Follow.objects.filter(follower=user).values_list('following', flat=True)
+        follower = Follow.objects.filter(following=user).values_list('follower', flat=True)
+
+        mutual_ids = set(following) & set(follower)
+        mutual_users = User.objects.filter(id__in=mutual_ids)
+
+
+        # messages
+        receiver_username = self.request.GET.get('user')
+        receiver = None
+
+        if receiver_username:
+            try:
+                receiver = User.objects.get(username=receiver_username)
+            except User.DoesNotExist:
+                receiver = None
+        if receiver:        
+            messages = Message.objects.filter(
+                sender__in=[self.request.user, receiver],
+                receiver__in=[self.request.user, receiver]
+            ).order_by('created_at')
+        else:
+            messages = Message.objects.none()
+
+        context['mutual_users'] = mutual_users
+        context['messages'] = messages
+        context['receiver'] = receiver
+        return context
+
+
+class SendMessage(LoginRequiredMixin, View):
+    def post(self, request):
+        receiver_username = request.POST.get("receiver")
+        text = request.POST.get('text')
+
+        receiver = User.objects.get(username=receiver_username)
+
+        Message.objects.create(
+            sender=request.user,
+            receiver=receiver,
+            text=text
+        )
+        return redirect(f"/chats/?user={receiver_username}")
+
 
 def test_base(request):
     return render(request, 'base.html')

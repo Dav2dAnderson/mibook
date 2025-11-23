@@ -1,7 +1,7 @@
 from django.urls import path
 
-from .views import (ProfileView, PostDetailView, PostUpdateView, PostDeleteView, 
-                    FeedView, PostReplyView, ProfileEditView, toggle_like, AboutProjectView, ContactView,)
+from .views import (PostDetailView, PostUpdateView, PostDeleteView, SendMessage,
+                    FeedView, PostReplyView, toggle_like, AboutProjectView, ContactView, ChatView)
 
 
 urlpatterns = [
@@ -11,6 +11,8 @@ urlpatterns = [
     path("post_reply/<slug:slug>/", PostReplyView.as_view(), name='post_reply'),
     path('about_project/', AboutProjectView.as_view(), name='about_project'),
     path('contact/', ContactView.as_view(), name='contact'),
+    path('chats/', ChatView.as_view(), name='chats'),
+    path('chats/send/', SendMessage.as_view(), name='send_message'),
     path('toggle_like/', toggle_like, name='toggle_like'),
     path('', FeedView.as_view(), name='feed_page')
 ]

@@ -31,11 +31,11 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", default=False)
 
-# ALLOWED_HOSTS = ['7e47f34b15ec.ngrok-free.app']l
+# ALLOWED_HOSTS = ['cfcd097c188f.ngrok-free.app']
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 
-CSRF_TRUSTED_ORIGINS = ["https://7e47f34b15ec.ngrok-free.app"]
+CSRF_TRUSTED_ORIGINS = ["https://cfcd097c188f.ngrok-free.app"]
 
 
 # Application definition
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'main',
     'accounts',
     'user_settings',
+    'widget_tweaks',
 
     'django_cleanup.apps.CleanupConfig'
 ]

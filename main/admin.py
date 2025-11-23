@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Profile, Post, Replies
+from .models import Profile, Post, Replies, Message
 # Register your models here.
 
 
@@ -18,5 +18,9 @@ class PostAdmin(admin.ModelAdmin):
 class RepliesAdmin(admin.ModelAdmin):
     list_display = ['post', 'author', 'created_at']
 
-    
 
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ['sender', 'receiver', 'created_at']
+
+    

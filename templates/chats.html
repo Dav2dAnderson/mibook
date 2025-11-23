@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chat{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mt-6 grid grid-cols-12 gap-4">
+
+    <!-- LEFT SIDEBAR — Followers list -->
+    <div class="col-span-3 bg-white rounded-xl shadow p-4 h-[80vh] overflow-y-auto">
+        <h2 class="text-xl font-bold mb-4">Following</h2>
+
+        {% for user in mutual_users %}
+        <a href="?user={{ user.username }}"
+           class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition">
+            <img src="{{ user.profile.image.url }}" class="w-10 h-10 rounded-full object-cover">
+            <p class="font-semibold">{{ user.username }}</p>
+        </a>
+        {% empty %}
+        <p class="text-gray-500 text-sm">You are not following anyone.</p>
+        {% endfor %}
+    </div>
+
+    <!-- CHAT WINDOW -->
+    <div class="col-span-9 bg-white rounded-xl shadow p-4 h-[80vh] flex flex-col">
+
+        <!-- Header -->
+        {% for follower in followers %}
+        <div class="border-b pb-3 mb-3 flex items-center gap-3">
+            <img src="{{ follower.profile.image.url }}"
+                 class="w-10 h-10 rounded-full object-cover">
+            <h2 class="text-xl font-semibold">{{ follower.username }}</h2>
+        </div>
+        {% endfor %}
+
+        <!-- Messages -->
+        <div id="messages"
+             class="flex-1 overflow-y-auto mb-4 space-y-3 pr-2">
+
+            {% for msg in messages %}
+            <div class="{% if msg.sender == request.user %}text-right{% endif %}">
+                <div class="inline-block px-4 py-2 rounded-xl
+                    {% if msg.sender == request.user %}
+                        bg-blue-500 text-white
+                    {% else %}
+                        bg-gray-200
+                    {% endif %}
+                ">
+                    {{ msg.text }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Message Form -->
+        {% if receiver %}
+        <form id="sendMessageForm" class="flex gap-2" method="POST" action="{% url 'send_message' %}">
+            {% csrf_token %}
+            <input type="hidden" name="receiver" value="{{ receiver.username }}">
+            <input id="msgInput"
+                type="text"
+                name="text"
+                class="w-full border rounded-lg p-2"
+                placeholder="Write a message...">
+            <button class="bg-blue-600 text-white px-4 rounded-lg" type="submit">Send</button>
+        </form>
+        {% else %}
+        <p class="text-gray-500 text-center">Select a user to start chatting.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+// CSRF TOKEN olish
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
+{% endblock content %}
+

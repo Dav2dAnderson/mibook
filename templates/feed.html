@@ -46,7 +46,7 @@
   <!-- Posts Feed (right column) -->
   <div class="md:col-span-2 space-y-4" id="post-list">
     {% for post in posts %}
-      {% include 'post_items.html' %}
+      {% include 'posts_related/post_items.html' %}
     {% empty %}
       <p class="text-gray-600">No posts yet. Be the first to share your thoughts!</p>
     {% endfor %}

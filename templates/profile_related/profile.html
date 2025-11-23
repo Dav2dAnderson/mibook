@@ -53,6 +53,17 @@
         <p class="text-gray-700 text-sm">{{ profile_user.first_name }} {{ profile_user.last_name }}</p>
         <p class="text-gray-600 text-sm mt-1">{{ profile_user.profile.bio|default:"No bio yet." }}</p>
       </div>
+      {% if profile_user != request.user %}
+      <button id="followBtn"
+          data-username="{{ profile_user.username }}"
+          class="px-4 py-2 bg-blue-600 text-white rounded">
+        {% if is_following %}
+          Unfollow
+        {% else %}
+          Follow
+        {% endif %}
+      </button>
+      {% endif %}
     </div>
 
     <!-- Stats -->
@@ -61,19 +72,23 @@
         <span class="font-semibold text-gray-900">{{ posts.count }}</span> Posts
       </div>
       <div>
-        <span class="font-semibold text-gray-900">{{ posts.replies.count }}</span> Followers
+        <span class="font-semibold text-gray-900">{{ profile_user.followers.count }}</span> 
+        <a href="{% url 'profile_followers' profile_user.username %}">Followers</a>
       </div>
     </div>
 
     <!-- User's Posts -->
+    <!-- User's Posts -->
     <h2 class="text-lg font-semibold mb-3">Posts by @{{ profile_user.username }}</h2>
-    <div class="space-y-4">
+
+    <div class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
       {% for post in posts %}
         <div class="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition">
           <a href="{% url 'post_detail' post.slug %}">
             <h3 class="text-lg font-semibold hover:text-blue-600">{{ post.title }}</h3>
           </a>
           <p class="text-gray-700 text-sm mt-1">{{ post.body }}</p>
+
           {% if post.updated_at %}
             <span class="text-xs text-gray-500">{{ post.updated_at }}</span>
           {% else %}
@@ -87,4 +102,46 @@
 
   </div>
 </div>
+<script>
+// CSRF token olish
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+// Buttonni olish
+const followBtn = document.getElementById("followBtn");
+
+// Bosilganda so‘rov yuborish
+followBtn.onclick = function() {
+    const username = this.dataset.username;
+
+    fetch(`/accounts/follow/${username}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "followed") {
+            followBtn.textContent = "Unfollow";
+        } else if (data.status === "unfollowed") {
+            followBtn.textContent = "Follow";
+        }
+    });
+};
+</script>
+
 {% endblock %}

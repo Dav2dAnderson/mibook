@@ -53,3 +53,18 @@ class Replies(models.Model):
     class Meta:
         verbose_name = "Reply"
         verbose_name_plural = "Replies"
+
+
+""" Chatting """
+class Message(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_messages")
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_messages")
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Message'
+        verbose_name_plural = "Messages"
+
+    def __str__(self):
+        return self.sender.username

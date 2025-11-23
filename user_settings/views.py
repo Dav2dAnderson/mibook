@@ -5,6 +5,7 @@ from django.views import View
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy
 
+from accounts.models import Follow
 # Create your views here.
 
 
@@ -18,6 +19,17 @@ class ProfileView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['posts'] = self.object.posts.all()
+
+        profile_user = self.get_object()
+        current_user = self.request.user
+
+        is_following = Follow.objects.filter(
+            follower=current_user, following=profile_user
+        ).exists()
+
+        context['posts'] = self.object.posts.all()
+        context['is_following'] = is_following
+
         return context
     
 
@@ -50,9 +62,27 @@ class ProfileEditView(View):
         return redirect("profile_user", username=user.username)
     
 
+
 class UserPasswordChangeView(mixins.LoginRequiredMixin, views.PasswordChangeView):
     template_name = 'profile_related/password_change.html'
     
     def get_success_url(self):
         return reverse_lazy('profile_user', kwargs={'username': self.request.user.username})
 
+
+class ProfileFollowersView(generic.ListView):
+    model = Follow
+    template_name = "profile_related/profile_followers.html"
+    context_object_name = 'followers'
+
+    def get_queryset(self):
+        username = self.kwargs['username']
+        return Follow.objects.filter(following__username=username)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        username = self.kwargs['username']
+        user = User.objects.get(username=username)
+
+        context['profile_user'] = user
+        return context

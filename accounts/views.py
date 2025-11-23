@@ -11,6 +11,9 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.decorators import login_required
+
+from .models import Follow
 # Create your views here.
 
 
@@ -115,3 +118,28 @@ class SecureRegisterView(View):
             })
         else:
             return redirect("feed_page")
+        
+
+@login_required
+def follow_toggle(request, username):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=400)
+    
+    try:
+        target = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found."}, status=404)
+
+    if request.user == target:
+        return JsonResponse({"error": "You cannot follow yourself."}, status=400)
+    
+    follow_obj, created = Follow.objects.get_or_create(
+        follower=request.user,
+        following=target
+    )
+
+    if not created:
+        follow_obj.delete()
+        return JsonResponse({'status': "unfollowed"})
+    return JsonResponse({"status": "followed"})
+
