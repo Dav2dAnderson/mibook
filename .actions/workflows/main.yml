@@ -1,0 +1,28 @@
+name: Build & Deploy mibook 
+
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    name: Build and Deploy mibook
+    runs-on: ubuntu-lates
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup JDK 17
+        uses: actions/setup-jave@v3
+        with:
+          distribution: 'corretto'
+          java-version: 17
+        
+      - name: Unit tests
+        run: mvn -B test --file pom.xml
+
+      - name: Build the application
+        run: |
+          mvn clean
+          mvn -B package --file pom.xml
