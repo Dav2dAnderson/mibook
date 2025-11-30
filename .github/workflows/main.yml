@@ -4,11 +4,30 @@ on:
   push:
     branches:
       - main
+    
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  build-deploy:
-    name: Build and Deploy mibook
+  test:
+    name: Test mibook
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: ${{ secrets.DB_NAME }}
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -25,9 +44,16 @@ jobs:
 
       - name: Run tests
         env:
+        
           SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           DEBUG: ${{ secrets.DEBUG }}
           ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+          DB_ENGINE: django.db.backends.postgresql
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
           EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
           EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
           EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
@@ -52,3 +78,30 @@ jobs:
           LOG_LEVEL: ${{ secrets.LOG_LEVEL }}
         run: |
           python manage.py migrate
+  build-and-push:
+    name: Build Docker Image
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_time == 'push'
+
+    steps:
+      -name: Checkout code
+      uses: actions/checkout@v3
+
+      -name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+      -name: Login To DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      -name: Build and push
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/mibook:latest
+        cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}//mibook:buildcache
+        cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}//mibook:buildcache,mode=max
