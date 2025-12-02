@@ -78,8 +78,8 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/mibook:latest
-          cache-from: type=registry,ref= ${{ secrets.DOCKER_USERNAME }} /mibook:buildcache
-          cache-to: type=registry,ref= ${{ secrets.DOCKER_USERNAME }} /mibook:buildcache,mode=max
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mibook:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mibook:buildcache,mode=max
 
   # deploy:
   #   name: Deploy to Server
