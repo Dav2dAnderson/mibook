@@ -43,7 +43,11 @@ jobs:
 
       - name: Run tests
         env:
-          DATABASE_URL: postgres://test_user:test_password@localhost:5432/mibook_db
+          DB_NAME: mibook_test
+          DB_USER: test_user
+          DB_PASSWORD: test_password
+          DB_HOST: localhost
+          DB_PORT: 5432
           SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           ALLOWED_HOSTS: 127.0.0.1,localhost
         run: |
