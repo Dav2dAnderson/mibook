@@ -45,6 +45,7 @@ jobs:
         env:
           DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
           SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          ALLOWED_HOSTS: localhost
         run: |
           python manage.py test
 
